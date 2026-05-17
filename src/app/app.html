@@ -1,0 +1,130 @@
+@if (isLandingPage()) {
+<main class="landing-page">
+  <section class="hero-card">
+    <h1>ගැහැණු පිරිමි මල් පළතුරු</h1>
+
+    <p class="subtitle">
+      Play the classic Sri Lankan word game online with your friends.
+    </p>
+
+    <a routerLink="/how-to-play" class="how-to-play-btn">
+      How to Play
+    </a>
+
+    @if (mode() === null) {
+    <div class="main-actions">
+      <button mat-raised-button color="primary" type="button" (click)="showJoinGame()">
+        Join Game
+      </button>
+
+      <button mat-raised-button color="primary" type="button" (click)="showCreateGame()">
+        Create Game
+      </button>
+    </div>
+    }
+
+    @if (mode() === 'join') {
+    <section class="form-section">
+      <h2>Join a Game</h2>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Your Name</mat-label>
+        <input matInput type="text" [(ngModel)]="playerName" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Room Code</mat-label>
+        <input matInput type="text" style="text-transform: uppercase;" [(ngModel)]="roomCode" />
+      </mat-form-field>
+
+      <button type="button" class="primary-btn full-width" (click)="joinGame()">
+        Join
+      </button>
+
+      <p class="helper-text">
+        Don’t have a room code?
+        <button type="button" class="link-btn" (click)="showCreateGame()">
+          Create a game
+        </button>
+      </p>
+
+      <button type="button" class="back-btn" (click)="goBack()">
+        Go Back
+      </button>
+    </section>
+    }
+
+    @if (mode() === 'create') {
+    <section class="form-section">
+      <h2>Create a Game</h2>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Your Name</mat-label>
+        <input matInput type="text" [(ngModel)]="createForm.playerName" placeholder="Enter your name" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Maximum Players</mat-label>
+        <mat-select [(ngModel)]="createForm.maxPlayers">
+          <!-- <mat-option [value]="2">2 Players</mat-option> -->
+          <mat-option [value]="3">3 Players</mat-option>
+          <mat-option [value]="4">4 Players</mat-option>
+          <mat-option [value]="5">5 Players</mat-option>
+          <mat-option [value]="6">6 Players</mat-option>
+          <mat-option [value]="7">7 Players</mat-option>
+          <mat-option [value]="8">8 Players</mat-option>
+          <mat-option [value]="9">9 Players</mat-option>
+          <mat-option [value]="10">10 Players</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+
+      <mat-form-field appearance="outline" class="full-width"><mat-label> Countdown
+        </mat-label>
+        <mat-select [(ngModel)]="createForm.countLimitSeconds">
+
+          <mat-option [value]="30">30 Seconds</mat-option>
+          <mat-option [value]="40">40 Seconds</mat-option>
+          <mat-option [value]="50">50 Seconds</mat-option>
+          <mat-option [value]="60">60 Seconds</mat-option>
+          <mat-option [value]="90">90 Seconds</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width"><mat-label> Language
+        </mat-label>
+        <mat-select [(ngModel)]="createForm.language">
+          <mat-option value="si">Sinhala</mat-option>
+          <mat-option value="en">English</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+
+      <div class="privacy-control">
+        <mat-slide-toggle [checked]="createForm.privateRoom"
+          [aria-label]="createForm.privateRoom ? 'Private Room' : 'Public Room'" (change)="toggleRoomPrivacy()">
+          {{ createForm.privateRoom ? 'Locked' : 'Open' }}
+        </mat-slide-toggle>
+      </div>
+
+      <button type="button" class="primary-btn full-width" (click)="createGame()">
+        Create Room
+      </button>
+
+      <p class="helper-text">
+        Already have a room code?
+        <button type="button" class="link-btn" (click)="showJoinGame()">
+          Join a game
+        </button>
+      </p>
+
+      <button type="button" class="back-btn" (click)="goBack()">
+        Go Back
+      </button>
+    </section>
+    }
+  </section>
+</main>
+}
+
+<router-outlet></router-outlet>

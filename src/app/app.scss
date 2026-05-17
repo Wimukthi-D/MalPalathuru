@@ -1,0 +1,330 @@
+/* =========================
+   Global
+========================= */
+
+* {
+  box-sizing: border-box;
+}
+
+:host {
+  display: block;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* =========================
+   Landing Page Layout
+========================= */
+
+.landing-page {
+  min-height: 100vh;
+  padding: 24px;
+  background: linear-gradient(135deg, #fff7e6, #ffe8cc);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-card {
+  width: 100%;
+  max-width: 520px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 36px 28px;
+  text-align: center;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+
+  h1 {
+    margin: 0;
+    font-size: 34px;
+    color: #222;
+  }
+}
+
+.subtitle {
+  margin: 14px 0 28px;
+  color: #666;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.how-to-play-btn {
+  display: inline-block;
+  margin-bottom: 28px;
+  color: #d35400;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* =========================
+   Buttons
+========================= */
+
+.main-actions {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+}
+
+.primary-btn,
+.secondary-btn,
+.back-btn {
+  border: none;
+  border-radius: 12px;
+  padding: 13px 20px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primary-btn {
+  background: #e67e22;
+  color: #ffffff;
+}
+
+.secondary-btn {
+  background: #f3f3f3;
+  color: #222222;
+}
+
+.back-btn {
+  margin-top: 12px;
+  background: transparent;
+  color: #777777;
+}
+
+.link-btn {
+  border: none;
+  background: transparent;
+  color: #d35400;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* =========================
+   Form Section
+========================= */
+
+.form-section {
+  margin-top: 8px;
+  text-align: left;
+
+  h2 {
+    text-align: center;
+    margin-bottom: 22px;
+    color: #222222;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 16px;
+    color: #333333;
+    font-weight: 600;
+  }
+
+  input,
+  textarea,
+  select {
+    width: 100%;
+    border: 1px solid #dddddd;
+    border-radius: 14px;
+    padding: 12px;
+    font-size: 15px;
+    outline: none;
+    font-family: inherit;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    border-color: #e67e22;
+  }
+
+  textarea {
+    resize: none;
+    text-transform: uppercase;
+  }
+}
+
+.helper-text {
+  text-align: center;
+  color: #666666;
+  margin-top: 18px;
+}
+
+/* =========================
+   Angular Material Form Fields
+========================= */
+
+:host ::ng-deep .mat-mdc-form-field {
+  width: 100%;
+}
+
+:host ::ng-deep .mat-mdc-text-field-wrapper {
+  height: 50px !important;
+  border-radius: 14px !important;
+}
+
+:host ::ng-deep .mat-mdc-form-field-flex {
+  height: 50px !important;
+  align-items: center !important;
+}
+
+:host ::ng-deep .mat-mdc-form-field-infix {
+  min-height: 50px !important;
+  padding-top: 9px !important;
+  padding-bottom: 9px !important;
+  display: flex;
+  align-items: center;
+}
+
+:host ::ng-deep .mat-mdc-form-field .mdc-notched-outline__leading {
+  border-radius: 14px 0 0 14px !important;
+}
+
+:host ::ng-deep .mat-mdc-form-field .mdc-notched-outline__trailing {
+  border-radius: 0 14px 14px 0 !important;
+}
+
+:host ::ng-deep input.mat-mdc-input-element {
+  font-size: 14px;
+}
+
+/* =========================
+   Angular Material Select Fix
+========================= */
+
+:host ::ng-deep .mat-mdc-select {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+:host ::ng-deep .mat-mdc-select-trigger {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+:host ::ng-deep .mat-mdc-select-value {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+:host ::ng-deep .mat-mdc-select-placeholder {
+  display: flex;
+  align-items: center;
+}
+
+:host ::ng-deep .mat-mdc-select-arrow-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+/* =========================
+   Privacy Slide Toggle
+========================= */
+
+.privacy-control {
+  width: 100%;
+  margin: 16px 0 20px;
+  display: flex;
+  justify-content: center;
+}
+
+:host ::ng-deep .privacy-control .mat-mdc-slide-toggle {
+  width: 100%;
+}
+
+:host ::ng-deep .privacy-control .mdc-form-field {
+  width: 100%;
+  justify-content: space-between;
+}
+
+:host ::ng-deep .privacy-control .mdc-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: #8a4b10;
+  margin-left: 14px;
+}
+
+:host ::ng-deep .privacy-control .mdc-switch__track {
+  height: 30px;
+  border-radius: 999px;
+}
+
+:host ::ng-deep .privacy-control .mdc-switch__track::before {
+  background: #d7f5df !important;
+  border: 1px solid #76c893;
+}
+
+:host ::ng-deep .privacy-control .mdc-switch__track::after {
+  background: #f97316 !important;
+  border: 1px solid #ea580c;
+}
+
+:host ::ng-deep .privacy-control .mdc-switch__handle {
+  width: 28px;
+  height: 28px;
+}
+
+:host ::ng-deep .privacy-control .mdc-switch__handle::before,
+:host ::ng-deep .privacy-control .mdc-switch__handle::after {
+  background: #ffffff !important;
+  border-radius: 50%;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
+}
+
+:host ::ng-deep .privacy-control .mdc-switch__icon {
+  display: none;
+}
+
+:host ::ng-deep .privacy-control .mdc-switch__handle::after {
+  content: "lock_open";
+  font-family: "Material Icons";
+  font-size: 17px;
+  color: #16a34a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:host ::ng-deep .privacy-control .mat-mdc-slide-toggle.mat-mdc-slide-toggle-checked .mdc-switch__handle::after {
+  content: "lock";
+  color: #f97316;
+}
+
+:host ::ng-deep .privacy-control .mat-mdc-slide-toggle .mat-mdc-slide-toggle-ripple {
+  display: none;
+}
+
+/* =========================
+   Responsive
+========================= */
+
+@media (max-width: 520px) {
+  .hero-card {
+    padding: 28px 20px;
+
+    h1 {
+      font-size: 28px;
+    }
+  }
+
+  .main-actions {
+    flex-direction: column;
+  }
+
+  .primary-btn,
+  .secondary-btn {
+    width: 100%;
+  }
+}
