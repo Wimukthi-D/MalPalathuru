@@ -27,14 +27,23 @@
     <section class="form-section">
       <h2>Join a Game</h2>
 
-      <mat-form-field appearance="outline" class="full-width" aria-errormessage=>
+      <mat-form-field appearance="outline" class="full-width" [class.field-error]="JoinErrors.name()">
         <mat-label>Your Name</mat-label>
-        <input matInput type="text" [(ngModel)]="playerName" />
+        <input matInput type="text" [(ngModel)]="playerName" (input)="JoinErrors.name.set(false)" />
+
+        @if (JoinErrors.name()) {
+        <mat-error>Please enter your name</mat-error>
+        }
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="full-width">
+      <mat-form-field appearance="outline" class="full-width" [class.field-error]="JoinErrors.code()">
         <mat-label>Room Code</mat-label>
-        <input matInput type="text" style="text-transform: uppercase;" [(ngModel)]="roomCode" />
+        <input matInput type="text" style="text-transform: uppercase;" [(ngModel)]="roomCode"
+          (input)="JoinErrors.code.set(false)" />
+
+        @if (JoinErrors.code()) {
+        <mat-error>Please enter room code</mat-error>
+        }
       </mat-form-field>
 
       @if (errorMessage()) {

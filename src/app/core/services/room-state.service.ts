@@ -19,4 +19,30 @@ export class RoomStateService {
         localStorage.setItem('playerName', String(player.playerName));
         localStorage.setItem('isHost', String(player.host));
     }
+
+    isStoredHost(): boolean {
+        return localStorage.getItem('isHost') === 'true';
+    }
+
+    getStoredRoomCode(): string | null {
+        return localStorage.getItem('roomCode');
+    }
+    
+    getStoredPlayerId(): number | null {
+        const playerId = localStorage.getItem('playerId');
+        return playerId ? Number(playerId) : null;
+    }
+
+    getStoredPlayerName(): string | null {
+        return localStorage.getItem('playerName');
+    }
+
+    clearRoom(): void {
+        this.currentRoom.set(null);
+        this.currentPLayer.set(null);
+        localStorage.removeItem('roomCode');
+        localStorage.removeItem('playerId');
+        localStorage.removeItem('playerName');
+        localStorage.removeItem('isHost');
+    }
 }

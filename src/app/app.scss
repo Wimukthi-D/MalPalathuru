@@ -314,6 +314,25 @@
   font-weight: 600;
 }
 
+:host ::ng-deep .field-error .mdc-notched-outline__leading,
+:host ::ng-deep .field-error .mdc-notched-outline__notch,
+:host ::ng-deep .field-error .mdc-notched-outline__trailing {
+  border-color: #dc2626 !important;
+}
+
+:host ::ng-deep .field-error .mat-mdc-floating-label {
+  color: #dc2626 !important;
+}
+
+:host ::ng-deep .field-error input {
+  caret-color: #dc2626;
+}
+
+:host ::ng-deep .mat-mdc-form-field-error {
+  font-size: 12px;
+  font-weight: 600;
+}
+
 /* =========================
    Responsive
 ========================= */
