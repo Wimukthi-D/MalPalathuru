@@ -27,7 +27,7 @@
     <section class="form-section">
       <h2>Join a Game</h2>
 
-      <mat-form-field appearance="outline" class="full-width">
+      <mat-form-field appearance="outline" class="full-width" aria-errormessage=>
         <mat-label>Your Name</mat-label>
         <input matInput type="text" [(ngModel)]="playerName" />
       </mat-form-field>
@@ -37,8 +37,14 @@
         <input matInput type="text" style="text-transform: uppercase;" [(ngModel)]="roomCode" />
       </mat-form-field>
 
-      <button type="button" class="primary-btn full-width" (click)="joinGame()">
-        Join
+      @if (errorMessage()) {
+      <p class="error-message">
+        {{ errorMessage() }}
+      </p>
+      }
+
+      <button type="button" class="primary-btn full-width" [disabled]="loading()" (click)="joinGame()">
+        {{loading() ? 'Joining...' : 'Join Room'}}
       </button>
 
       <p class="helper-text">
@@ -107,8 +113,8 @@
         </mat-slide-toggle>
       </div>
 
-      <button type="button" class="primary-btn full-width" (click)="createGame()">
-        Create Room
+      <button type="button" class="primary-btn full-width" [disabled]="loading()" (click)="createGame()">
+        {{loading() ? 'Creating...' : 'Create Game'}}
       </button>
 
       <p class="helper-text">

@@ -8,6 +8,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { RoomApiService } from "./core/services/room-api.service";
+import { RoomStateService } from "./core/services/room-state.service";
+import { CreateRoomRequest, JoinRoomRequest } from './core/room-request.model';
+import { Room } from './core/room.models';
 
 type LandingMode = 'join' | 'create' | null;
 
@@ -17,8 +21,26 @@ type LandingMode = 'join' | 'create' | null;
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
+
+
 export class App {
   private router = inject(Router);
+
+  private readonly roomApiService = inject(RoomApiService);
+  private readonly roomStateService = inject(RoomStateService);
+
+
+  loading = signal(false);
+  errorMessage = signal<string | null>(null);
+
+  JoinErrors = {
+    name : signal(false),
+    code : signal(false)
+  }
+
+  CreateErrors = {
+    name : signal(false)
+  }
 
   currentUrl = signal('/');
   mode = signal<LandingMode>(null);
@@ -60,51 +82,107 @@ export class App {
     this.playerName = '';
   }
 
-  joinGame(): void {
-    if (!this.playerName.trim()) {
-      alert('Please enter your name');
-      return;
-    }
-
-    if (!this.roomCode.trim()) {
-      alert('Please enter room code');
-      return;
-    }
-
-    const code = this.roomCode.trim().toUpperCase();
-
-    this.router.navigate(['/room', code, 'lobby'], {
-      queryParams: {
-        playerName: this.playerName.trim()
-      }
-    });
+  private findLatestJoinedPlayer(room: Room, playerName: string) {
+    return [...room.players]
+      .reverse()
+      .find((player) => player.playerName === playerName);
   }
 
-  createGame(): void {
-    if (!this.createForm.playerName.trim()) {
-      alert('Please enter your name');
+  joinGame(): void {
+
+    const playerName = this.playerName.trim();
+    const roomCode = this.roomCode.trim().toUpperCase();
+
+    if (!playerName) {
+      this.JoinErrors.name.set(true)
+      this.errorMessage.set('Please enter your name');
       return;
     }
 
-    const generatedRoomCode = this.generateRoomCode();
+    if (!roomCode) {
+      this.JoinErrors.code.set(true)
+      this.errorMessage.set('Please enter room code');
+      return;
+    }
 
-    this.router.navigate(['/room', generatedRoomCode, 'lobby'], {
-      queryParams: {
-        host: true,
-        playerName: this.createForm.playerName.trim(),
-        maxPlayers: this.createForm.maxPlayers,
-        countLimitSeconds: this.createForm.countLimitSeconds,
-        language: this.createForm.language,
-        privateRoom: this.createForm.privateRoom
+    const request: JoinRoomRequest = {
+      playerName,
+      roomCode
+    };
+
+    this.loading.set(true);
+    this.errorMessage.set(null);
+
+    this.roomApiService.joinRoom(request).subscribe({
+      next: (room) => {
+        console.log(room);
+        const currentPlayer = this.findLatestJoinedPlayer(room, playerName);
+
+        this.roomStateService.setRoom(room);
+
+        if (currentPlayer) {
+          this.roomStateService.setCurrentPlayer(currentPlayer);
+        }
+
+        this.loading.set(false)
+        this.router.navigate(['/room', room.roomCode, 'lobby'])
+      },
+      error: (error: Error) => {
+        this.loading.set(false);
+        this.errorMessage.set(error.message);
       }
     });
+
+
+  }
+
+
+
+  createGame(): void {
+    const playerName = this.createForm.playerName.trim();
+
+    if (!playerName) {
+      this.errorMessage.set('Please enter your name')
+      return;
+    }
+
+    const request: CreateRoomRequest = {
+      playerName,
+      language: this.createForm.language === 'si' ? 'SINHALA' : 'ENGLISH',
+      maxPlayers: this.createForm.maxPlayers,
+      countLimitSeconds: this.createForm.countLimitSeconds,
+      privateRoom: this.createForm.privateRoom
+    };
+
+    this.loading.set(true);
+    this.errorMessage.set(null);
+
+    this.roomApiService.createRoom(request).subscribe({
+
+      next: (room) => {
+        const hostPlayer = room.players.find((player) => player.host);
+        this.roomStateService.setRoom(room);
+
+        if (hostPlayer) {
+          this.roomStateService.setCurrentPlayer(hostPlayer);
+        }
+        this.loading.set(false);
+
+        this.router.navigate(['/room', room.roomCode, 'lobby']);
+      },
+
+      error: (error: Error) => {
+        this.loading.set(false);
+        this.errorMessage.set(error.message);
+      }
+    })
   }
 
   toggleRoomPrivacy(): void {
-  this.createForm.privateRoom = !this.createForm.privateRoom;
-}
-
-  private generateRoomCode(): string {
-    return Math.random().toString(36).substring(2, 8).toUpperCase();
+    this.createForm.privateRoom = !this.createForm.privateRoom;
   }
+
+  // private generateRoomCode(): string {
+  //   return Math.random().toString(36).substring(2, 8).toUpperCase();
+  // }
 }
