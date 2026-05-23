@@ -1,4 +1,4 @@
-import { GameLanguage } from "./room.models";
+import { GameLanguage } from "./models/room.models";
 
 export interface CreateRoomRequest {
     playerName: string;

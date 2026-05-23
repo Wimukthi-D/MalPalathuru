@@ -11,7 +11,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { RoomApiService } from "./core/services/room-api.service";
 import { RoomStateService } from "./core/services/room-state.service";
 import { CreateRoomRequest, JoinRoomRequest } from './core/room-request.model';
-import { Room } from './core/room.models';
+import { Room } from './core/models/room.models';
 
 type LandingMode = 'join' | 'create' | null;
 

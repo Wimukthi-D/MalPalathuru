@@ -1,6 +1,6 @@
 import { signal, Injectable } from "@angular/core";
-import { Room } from "../room.models";
-import { Player } from "../player.model";
+import { Room } from "../models/room.models";
+import { Player } from "../models/player.model";
 
 @Injectable({ providedIn: 'root' })
 export class RoomStateService {

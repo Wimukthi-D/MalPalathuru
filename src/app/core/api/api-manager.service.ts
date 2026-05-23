@@ -5,7 +5,7 @@ import { catchError, Observable, throwError } from "rxjs";
 
 
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class ApiManagerService {
 
 
@@ -22,6 +22,17 @@ export class ApiManagerService {
     post<TRequest, TResponse>(endpoint: string, requestBody: TRequest): Observable<TResponse> {
         return this.http
             .post<TResponse>(this.createUrl(endpoint), requestBody)
+            .pipe(catchError(this.handleError));
+    }
+    patch<TRequest, TResponse>(endpoint: string, requestBody: TRequest | null = null): Observable<TResponse> {
+        return this.http
+            .patch<TResponse>(this.createUrl(endpoint), requestBody)
+            .pipe(catchError(this.handleError));
+    }
+
+    delete<TResponse>(endpoint: string): Observable<TResponse> {
+        return this.http
+            .delete<TResponse>(this.createUrl(endpoint))
             .pipe(catchError(this.handleError));
     }
 
@@ -47,6 +58,8 @@ export class ApiManagerService {
 
         return throwError(() => new Error(message));
     }
+
+
 
 }
 

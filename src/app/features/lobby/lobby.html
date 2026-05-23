@@ -1,191 +1,163 @@
 <main class="lobby-page">
-  <section class="lobby-card">
-    @if (loading()) {
-      <div class="loading-box">
-        <mat-spinner diameter="36"></mat-spinner>
-        <p>Loading lobby...</p>
-      </div>
-    }
-
-    @if (errorMessage()) {
-      <div class="error-box">
-        <mat-icon>error</mat-icon>
-        <p>{{ errorMessage() }}</p>
-
-        <a routerLink="/" class="text-link">
-          Back to Home
-        </a>
-      </div>
-    }
-
-    @if (room() && !loading()) {
-      <header class="lobby-header">
-        <div>
-          <p class="eyebrow">Game Lobby</p>
-          <h1>Waiting for Players</h1>
+    <section class="lobby-card">
+        @if (loading()) {
+        <div class="loading-box">
+            <mat-spinner diameter="36"></mat-spinner>
+            <p>Loading lobby...</p>
         </div>
-
-        <button
-          mat-icon-button
-          type="button"
-          aria-label="Refresh lobby"
-          (click)="refreshLobby()"
-        >
-          <mat-icon>refresh</mat-icon>
-        </button>
-      </header>
-
-      <div class="room-code-card">
-        <span>Room Code</span>
-
-        <div class="room-code-row">
-          <strong>{{ room()?.roomCode }}</strong>
-
-          <button
-            mat-icon-button
-            type="button"
-            aria-label="Copy room code"
-            (click)="copyRoomCode()"
-          >
-            <mat-icon>{{ copied() ? 'check' : 'content_copy' }}</mat-icon>
-          </button>
-        </div>
-
-        <small>
-          Share this code with your friends to join the game.
-        </small>
-      </div>
-
-      <div class="status-grid">
-        <div class="status-item">
-          <span>Players</span>
-          <strong>{{ playerCount() }} / {{ room()?.maxPlayers }}</strong>
-        </div>
-
-        <div class="status-item">
-          <span>Language</span>
-          <strong>{{ room()?.language }}</strong>
-        </div>
-
-        <div class="status-item">
-          <span>Timer</span>
-          <strong>{{ room()?.countLimitSeconds }}s</strong>
-        </div>
-
-        <div class="status-item">
-          <span>Privacy</span>
-          <strong>{{ room()?.privateRoom ? 'Private' : 'Public' }}</strong>
-        </div>
-      </div>
-
-      <section class="current-player-box">
-        <span>You are playing as</span>
-        <strong>{{ currentPlayer()?.playerName || currentPlayerName() || 'Unknown Player' }}</strong>
-
-        @if (isHost()) {
-          <small>Host</small>
-        } @else {
-          <small>Player</small>
         }
-      </section>
 
-      <section class="player-section">
-        <div class="section-title-row">
-          <h2>Players</h2>
-          <span>{{ playerCount() }} joined</span>
+        @if (errorMessage()) {
+        <div class="error-box">
+            <mat-icon>error</mat-icon>
+            <p>{{ errorMessage() }}</p>
+
+            <a routerLink="/" class="text-link">
+                Back to Home
+            </a>
         </div>
+        }
 
-        <div class="player-list">
-          @for (player of room()?.players; track player.id) {
-            <div
-              class="player-item"
-              [class.current-player]="player.id === currentPlayerId()"
-            >
-              <div class="player-left">
-                <div class="avatar">
-                  {{ player.playerName.charAt(0).toUpperCase() }}
-                </div>
-
-                <div>
-                  <strong>{{ player.playerName }}</strong>
-
-                  <small>
-                    @if (player.host) {
-                      Host
-                    } @else {
-                      Player
-                    }
-                  </small>
-                </div>
-              </div>
-
-              <div class="player-actions">
-                @if (player.connected) {
-                  <span class="connected-badge">Online</span>
-                } @else {
-                  <span class="offline-badge">Offline</span>
-                }
-
-                @if (isHost() && !player.host && player.id !== currentPlayerId()) {
-                  <button
-                    mat-icon-button
-                    type="button"
-                    aria-label="Kick player"
-                    (click)="kickPlayer(player)"
-                  >
-                    <mat-icon>person_remove</mat-icon>
-                  </button>
-                }
-              </div>
+        @if (room() && !loading()) {
+        <header class="lobby-header">
+            <div>
+                <p class="eyebrow">Game Lobby</p>
+                <h1>{{ isLobbyStatus() ? 'Waiting for Players' : 'Game Started' }}</h1>
             </div>
-          }
+
+            <button mat-icon-button type="button" aria-label="Refresh lobby" (click)="refreshLobby()">
+                <mat-icon>refresh</mat-icon>
+            </button>
+        </header>
+
+        <div class="room-code-card">
+            <span>Room Code</span>
+
+            <div class="room-code-row">
+                <strong>{{ room()?.roomCode }}</strong>
+
+                <button mat-icon-button type="button" aria-label="Copy room code" (click)="copyRoomCode()">
+                    <mat-icon>{{ copied() ? 'check' : 'content_copy' }}</mat-icon>
+                </button>
+            </div>
+
+            <small>
+                Share this code with your friends to join the game.
+            </small>
         </div>
-      </section>
 
-      <section class="lobby-actions">
-        @if (isHost()) {
-          <button
-            mat-stroked-button
-            type="button"
-            class="action-button"
-            (click)="lockOrUnlockRoom()"
-          >
-            <mat-icon>{{ room()?.locked ? 'lock_open' : 'lock' }}</mat-icon>
-            {{ room()?.locked ? 'Unlock Room' : 'Lock Room' }}
-          </button>
+        <div class="status-grid">
+            <div class="status-item">
+                <span>Players</span>
+                <strong>{{ playerCount() }} / {{ room()?.maxPlayers }}</strong>
+            </div>
 
-          <button
-            mat-raised-button
-            color="primary"
-            type="button"
-            class="action-button"
-            (click)="startGame()"
-          >
-            <mat-icon>play_arrow</mat-icon>
-            Start Game
-          </button>
-        } @else {
-          <button
-            mat-raised-button
-            color="primary"
-            type="button"
-            class="action-button"
-            (click)="toggleReady()"
-          >
-            <mat-icon>check_circle</mat-icon>
-            Ready
-          </button>
+            <div class="status-item">
+                <span>Language</span>
+                <strong>{{ room()?.language }}</strong>
+            </div>
+
+            <div class="status-item">
+                <span>Timer</span>
+                <strong>{{ room()?.countLimitSeconds }}s</strong>
+            </div>
+
+            <div class="status-item">
+                <span>Privacy</span>
+                <strong>{{ room()?.privateRoom ? 'Private' : 'Public' }}</strong>
+            </div>
+
+            <div class="status-item">
+                <span>Status</span>
+                <strong>{{ room()?.status }}</strong>
+            </div>
+        </div>
+
+        <section class="current-player-box">
+            <span>You are playing as</span>
+            <strong>{{ currentPlayer()?.playerName || currentPlayerName() || 'Unknown Player' }}</strong>
+
+            @if (isHost()) {
+            <small>Host</small>
+            } @else {
+            <small>Player</small>
+            }
+        </section>
+
+        <section class="player-section">
+            <div class="section-title-row">
+                <h2>Players</h2>
+                <span>{{ playerCount() }} joined</span>
+            </div>
+
+            <div class="player-list">
+                @for (player of room()?.players; track player.id) {
+                <div class="player-item" [class.current-player]="player.id === currentPlayerId()">
+                    <div class="player-left">
+                        <div class="avatar">
+                            {{ player.playerName.charAt(0).toUpperCase() }}
+                        </div>
+
+                        <div>
+                            <strong>{{ player.playerName }}</strong>
+
+                            <small>
+                                @if (player.host) {
+                                Host
+                                } @else {
+                                Player
+                                }
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="player-actions">
+                        @if (player.connected) {
+                        <span class="connected-badge">Online</span>
+                        } @else {
+                        <span class="offline-badge">Offline</span>
+                        }
+
+                        @if (isHost() && !player.host && player.id !== currentPlayerId()) {
+                        <button mat-icon-button type="button" aria-label="Kick player"
+                            [disabled]="actionLoading() || !isLobbyStatus()" (click)="kickPlayer(player)">
+                            <mat-icon>person_remove</mat-icon>
+                        </button>
+                        }
+                    </div>
+                </div>
+                }
+            </div>
+        </section>
+
+        <section class="lobby-actions">
+            @if (isHost()) {
+            <button mat-stroked-button type="button" class="action-button"
+                [disabled]="actionLoading() || !isLobbyStatus()" (click)="lockOrUnlockRoom()">
+                <mat-icon>{{ room()?.locked ? 'lock_open' : 'lock' }}</mat-icon>
+                {{ room()?.locked ? 'Unlock Room' : 'Lock Room' }}
+            </button>
+
+            <button mat-raised-button color="primary" type="button" class="action-button"
+                [disabled]="actionLoading() || !isLobbyStatus()" (click)="startGame()">
+                <mat-icon>play_arrow</mat-icon>
+                Start Game
+            </button>
+            } @else {
+            <button mat-raised-button color="primary" type="button" class="action-button"
+                [disabled]="actionLoading() || !isLobbyStatus()" (click)="toggleReady()">
+                <mat-icon>
+                    {{ currentPlayer()?.ready ? 'cancel' : 'check_circle' }}
+                </mat-icon>
+
+                {{ currentPlayer()?.ready ? 'Not Ready' : 'Ready' }}
+            </button>
+            }
+
+            <button mat-button type="button" class="leave-button" (click)="leaveLobby()">
+                Leave Lobby
+            </button>
+        </section>
         }
-
-        <button
-          mat-button
-          type="button"
-          class="leave-button"
-          (click)="leaveLobby()"
-        >
-          Leave Lobby
-        </button>
-      </section>
-    }
-  </section>
+    </section>
 </main>
