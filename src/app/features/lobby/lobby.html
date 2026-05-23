@@ -143,19 +143,10 @@
                 <mat-icon>play_arrow</mat-icon>
                 Start Game
             </button>
-            } @else {
-            <button mat-raised-button color="primary" type="button" class="action-button"
-                [disabled]="actionLoading() || !isLobbyStatus()" (click)="toggleReady()">
-                <mat-icon>
-                    {{ currentPlayer()?.ready ? 'cancel' : 'check_circle' }}
-                </mat-icon>
-
-                {{ currentPlayer()?.ready ? 'Not Ready' : 'Ready' }}
-            </button>
             }
 
-            <button mat-button type="button" class="leave-button" (click)="leaveLobby()">
-                Leave Lobby
+            <button mat-button type="button" class="leave-button" [disabled]="actionLoading()" (click)="leaveLobby()">
+                {{ isHost() ? 'Leave & Close Room' : 'Leave Lobby' }}
             </button>
         </section>
         }

@@ -28,6 +28,8 @@ export class RoomSocketService {
         `/topic/rooms/${roomCode}/state`,
         (message: IMessage) => {
           const event = JSON.parse(message.body) as RoomEvent;
+          console.log(event);
+
           onRoomEvent(event);
         }
       ) ?? null;

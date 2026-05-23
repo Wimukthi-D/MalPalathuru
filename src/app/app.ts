@@ -32,6 +32,7 @@ export class App {
 
   loading = signal(false);
   errorMessage = signal<string | null>(null);
+  noticeMessage = this.roomStateService.noticeMessage;
 
   JoinErrors = {
     name : signal(false),
@@ -69,14 +70,17 @@ export class App {
   }
 
   showJoinGame(): void {
+    this.roomStateService.clearNotice();
     this.mode.set('join');
   }
 
   showCreateGame(): void {
+    this.roomStateService.clearNotice();
     this.mode.set('create');
   }
 
   goBack(): void {
+    this.roomStateService.clearNotice();
     this.mode.set(null);
     this.roomCode = '';
     this.playerName = '';
@@ -112,6 +116,7 @@ export class App {
 
     this.loading.set(true);
     this.errorMessage.set(null);
+    this.roomStateService.clearNotice();
 
     this.roomApiService.joinRoom(request).subscribe({
       next: (room) => {
@@ -156,6 +161,7 @@ export class App {
 
     this.loading.set(true);
     this.errorMessage.set(null);
+    this.roomStateService.clearNotice();
 
     this.roomApiService.createRoom(request).subscribe({
 

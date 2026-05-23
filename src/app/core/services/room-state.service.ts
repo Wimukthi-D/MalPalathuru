@@ -6,6 +6,7 @@ import { Player } from "../models/player.model";
 export class RoomStateService {
     currentRoom = signal<Room | null>(null);
     currentPLayer = signal<Player | null>(null);
+    noticeMessage = signal<string | null>(null);
 
     setRoom(room: Room): void {
         this.currentRoom.set(room);
@@ -35,6 +36,14 @@ export class RoomStateService {
 
     getStoredPlayerName(): string | null {
         return localStorage.getItem('playerName');
+    }
+
+    setNotice(message: string): void {
+        this.noticeMessage.set(message);
+    }
+
+    clearNotice(): void {
+        this.noticeMessage.set(null);
     }
 
     clearRoom(): void {

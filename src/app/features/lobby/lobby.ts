@@ -97,6 +97,11 @@ export class Lobby implements OnInit, OnDestroy {
   }
 
   handleRoomEvent(event: RoomEvent): void {
+    if (event.type === 'ROOM_CLOSED') {
+      this.handleRoomClosed();
+      return;
+    }
+
     if (event.type === 'PLAYER_KICKED') {
       this.handleKickEvent(event);
       return;
@@ -113,8 +118,9 @@ export class Lobby implements OnInit, OnDestroy {
     const currentPlayerId = this.currentPlayerId();
 
     if (event.affectedPlayerId === currentPlayerId) {
-      alert('You were removed from the room by the host.');
+      this.roomSocketService.disconnect();
       this.roomStateService.clearRoom();
+      this.roomStateService.setNotice('You were removed from the room by the host.');
       this.router.navigate(['/']);
       return;
     }
@@ -122,9 +128,25 @@ export class Lobby implements OnInit, OnDestroy {
     this.updateRoomState(event.room);
   }
 
+  handleRoomClosed(): void {
+    this.roomSocketService.disconnect();
+    this.roomStateService.clearRoom();
+    this.roomStateService.setNotice('The host left. The room has been closed.');
+    this.router.navigate(['/']);
+  }
+
   updateRoomState(room: Room): void {
     this.room.set(room);
     this.roomStateService.setRoom(room);
+
+    const currentPlayerId = this.currentPlayerId();
+    const currentPlayer = room.players.find((player) => player.id === currentPlayerId);
+
+    if (currentPlayer) {
+      this.currentPlayerName.set(currentPlayer.playerName);
+      this.isHost.set(currentPlayer.host);
+      this.roomStateService.setCurrentPlayer(currentPlayer);
+    }
   }
 
   copyRoomCode(): void {
@@ -154,30 +176,40 @@ export class Lobby implements OnInit, OnDestroy {
   }
 
   leaveLobby(): void {
-    this.roomSocketService.disconnect();
-    this.roomStateService.clearRoom();
-    this.router.navigate(['/']);
-  }
-
-  toggleReady(): void {
     const room = this.room();
     const player = this.currentPlayer();
 
-    if (!room || !player || !this.isLobbyStatus()) {
+    if (!room || !player) {
+      this.roomSocketService.disconnect();
+      this.roomStateService.clearRoom();
+      this.router.navigate(['/']);
       return;
     }
 
-    const newReadyStatus = !player.ready;
+    if (player.host && !confirm('Leaving as host will close the room for everyone. Continue?')) {
+      return;
+    }
 
     this.actionLoading.set(true);
     this.errorMessage.set(null);
 
     this.roomApiService
-      .updateReadyStatus(room.roomCode, player.id, newReadyStatus)
+      .leavePlayer(room.roomCode, player.id)
       .subscribe({
         next: (updatedRoom) => {
-          this.updateRoomState(updatedRoom);
           this.actionLoading.set(false);
+
+          if (!updatedRoom || player.host) {
+            this.roomSocketService.disconnect();
+            this.roomStateService.clearRoom();
+            this.roomStateService.setNotice('The host left. The room has been closed.');
+            this.router.navigate(['/']);
+            return;
+          }
+
+          this.roomSocketService.disconnect();
+          this.roomStateService.clearRoom();
+          this.router.navigate(['/']);
         },
         error: (error: Error) => {
           this.errorMessage.set(error.message);
@@ -188,9 +220,9 @@ export class Lobby implements OnInit, OnDestroy {
 
   lockOrUnlockRoom(): void {
     const room = this.room();
-    const hostPlayerId = this.currentPlayerId();
+    const hostPlayer = this.currentPlayer();
 
-    if (!room || !hostPlayerId || !this.isLobbyStatus()) {
+    if (!room || !hostPlayer?.host || !this.isLobbyStatus()) {
       return;
     }
 
@@ -198,8 +230,8 @@ export class Lobby implements OnInit, OnDestroy {
     this.errorMessage.set(null);
 
     const request$ = room.locked
-      ? this.roomApiService.unlockRoom(room.roomCode, hostPlayerId)
-      : this.roomApiService.lockRoom(room.roomCode, hostPlayerId);
+      ? this.roomApiService.unlockRoom(room.roomCode, hostPlayer.id)
+      : this.roomApiService.lockRoom(room.roomCode, hostPlayer.id);
 
     request$.subscribe({
       next: (updatedRoom) => {
@@ -215,9 +247,13 @@ export class Lobby implements OnInit, OnDestroy {
 
   kickPlayer(player: Player): void {
     const room = this.room();
-    const hostPlayerId = this.currentPlayerId();
+    const hostPlayer = this.currentPlayer();
 
-    if (!room || !hostPlayerId || !this.isLobbyStatus()) {
+    if (!room || !hostPlayer?.host || !this.isLobbyStatus()) {
+      return;
+    }
+
+    if (!confirm(`Remove ${player.playerName} from this room?`)) {
       return;
     }
 
@@ -225,7 +261,7 @@ export class Lobby implements OnInit, OnDestroy {
     this.errorMessage.set(null);
 
     this.roomApiService
-      .kickPlayer(room.roomCode, player.id, hostPlayerId)
+      .kickPlayer(room.roomCode, player.id, hostPlayer.id)
       .subscribe({
         next: (updatedRoom) => {
           this.updateRoomState(updatedRoom);
@@ -240,16 +276,16 @@ export class Lobby implements OnInit, OnDestroy {
 
   startGame(): void {
     const room = this.room();
-    const hostPlayerId = this.currentPlayerId();
+    const hostPlayer = this.currentPlayer();
 
-    if (!room || !hostPlayerId || !this.isLobbyStatus()) {
+    if (!room || !hostPlayer?.host || !this.isLobbyStatus()) {
       return;
     }
 
     this.actionLoading.set(true);
     this.errorMessage.set(null);
 
-    this.roomApiService.startGame(room.roomCode, hostPlayerId).subscribe({
+    this.roomApiService.startGame(room.roomCode, hostPlayer.id).subscribe({
       next: (updatedRoom) => {
         this.updateRoomState(updatedRoom);
         this.actionLoading.set(false);

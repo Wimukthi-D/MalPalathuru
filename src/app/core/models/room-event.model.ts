@@ -2,12 +2,12 @@ import { Room } from "./room.models";
 
 export type RoomEventType =
   | 'PLAYER_JOINED'
-  | 'PLAYER_READY_UPDATED'
+  | 'PLAYER_LEFT'
   | 'PLAYER_KICKED'
   | 'ROOM_LOCKED'
   | 'ROOM_UNLOCKED'
   | 'GAME_STARTED'
-  | 'ROOM_UPDATED';
+  | 'ROOM_CLOSED';
 
 export interface RoomEvent {
   type: RoomEventType;

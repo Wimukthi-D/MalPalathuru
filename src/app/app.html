@@ -7,6 +7,12 @@
       Play the classic Sri Lankan word game online with your friends.
     </p>
 
+    @if (noticeMessage()) {
+    <p class="notice-message">
+      {{ noticeMessage() }}
+    </p>
+    }
+
     <a routerLink="/how-to-play" class="how-to-play-btn">
       How to Play
     </a>
