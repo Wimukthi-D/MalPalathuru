@@ -3,5 +3,7 @@ export interface Player {
     playerName: string;
     host: boolean;
     connected: boolean;
+    ready?: boolean;
+    roundScore?: number;
     totalScore: number;
 }

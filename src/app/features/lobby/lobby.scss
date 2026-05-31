@@ -10,7 +10,7 @@
 
 .lobby-card {
   width: 100%;
-  max-width: 760px;
+  max-width: 1040px;
   background: #ffffff;
   border-radius: 26px;
   padding: 28px;
@@ -180,7 +180,16 @@
   small {
     color: #777777;
     font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
   }
+}
+
+.score-dot {
+  color: #9a3412;
+  font-weight: 700;
 }
 
 .avatar {
@@ -202,7 +211,9 @@
 }
 
 .connected-badge,
-.offline-badge {
+.offline-badge,
+.ready-badge,
+.waiting-badge {
   padding: 5px 9px;
   border-radius: 999px;
   font-size: 12px;
@@ -217,6 +228,16 @@
 .offline-badge {
   background: #fee2e2;
   color: #991b1b;
+}
+
+.ready-badge {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.waiting-badge {
+  background: #fef3c7;
+  color: #92400e;
 }
 
 .lobby-actions {
@@ -260,10 +281,291 @@
   }
 }
 
+.compact-error {
+  min-height: auto;
+  margin-bottom: 18px;
+  border: 1px solid #fecaca;
+  border-radius: 14px;
+  background: #fff1f2;
+  padding: 14px;
+
+  p {
+    margin: 0;
+  }
+}
+
+.notice-box {
+  margin-bottom: 18px;
+  border: 1px solid #fed7aa;
+  border-radius: 14px;
+  background: #fff7ed;
+  color: #9a3412;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+}
+
 .text-link {
   color: #d35400;
   font-weight: 700;
   text-decoration: none;
+}
+
+.game-flow {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.round-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  border: 1px solid #fed7aa;
+  border-radius: 18px;
+  background: #fff7ed;
+  padding: 14px;
+
+  div {
+    min-width: 0;
+  }
+
+  span {
+    display: block;
+    color: #9a3412;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  strong {
+    display: block;
+    margin-top: 5px;
+    color: #222222;
+    overflow-wrap: anywhere;
+  }
+}
+
+.phase-panel {
+  border: 1px solid #eeeeee;
+  border-radius: 18px;
+  background: #ffffff;
+  padding: 18px;
+
+  p {
+    margin: 6px 0 0;
+    color: #666666;
+  }
+}
+
+.compact-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: #fafafa;
+
+  h2 {
+    margin: 0;
+    color: #222222;
+  }
+}
+
+.letter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
+  gap: 8px;
+}
+
+.letter-button {
+  min-height: 46px;
+  border: 1px solid #fed7aa;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #9a3412;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.letter-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.letter-button.used-letter {
+  background: #f3f4f6;
+  border-color: #e5e7eb;
+  color: #6b7280;
+}
+
+.letter-button.selected-letter {
+  background: #e67e22;
+  border-color: #e67e22;
+  color: #ffffff;
+  opacity: 1;
+}
+
+.answer-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.answer-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  span {
+    color: #555555;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  mat-icon {
+    color: #e67e22;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  input {
+    width: 100%;
+    border: 1px solid #dddddd;
+    border-radius: 12px;
+    padding: 12px;
+    font: inherit;
+    outline: none;
+  }
+
+  input:focus {
+    border-color: #e67e22;
+  }
+
+  input:disabled {
+    background: #f5f5f5;
+    color: #777777;
+  }
+}
+
+.phase-actions {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+
+  mat-icon {
+    margin-right: 5px;
+  }
+}
+
+.current-review-card {
+  border: 1px solid #fed7aa;
+  border-radius: 16px;
+  background: #fff7ed;
+  padding: 16px;
+
+  span,
+  small {
+    color: #9a3412;
+    font-weight: 800;
+  }
+
+  strong {
+    display: block;
+    margin: 6px 0;
+    color: #222222;
+    font-size: 26px;
+    overflow-wrap: anywhere;
+  }
+}
+
+.review-table-wrap {
+  margin-top: 16px;
+  overflow-x: auto;
+}
+
+.review-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+
+  th,
+  td {
+    border-bottom: 1px solid #eeeeee;
+    padding: 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    color: #777777;
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+
+  td {
+    color: #222222;
+  }
+
+  td span {
+    display: block;
+    overflow-wrap: anywhere;
+  }
+
+  td small {
+    display: block;
+    margin-top: 5px;
+    color: #777777;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  td.current-answer {
+    background: #fff7ed;
+    box-shadow: inset 3px 0 0 #e67e22;
+  }
+}
+
+.leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.leaderboard-row {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #eeeeee;
+  border-radius: 14px;
+  padding: 12px 14px;
+
+  strong {
+    color: #222222;
+    overflow-wrap: anywhere;
+  }
+
+  span {
+    color: #666666;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .rank {
+    color: #d35400;
+    font-size: 18px;
+    font-weight: 900;
+  }
 }
 
 @media (max-width: 720px) {
@@ -273,6 +575,11 @@
 
   .status-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .round-summary,
+  .answer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .room-code-row strong {
@@ -287,6 +594,19 @@
       margin-left: 0;
     }
   }
+
+  .compact-panel {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .leaderboard-row {
+    grid-template-columns: 52px minmax(0, 1fr);
+
+    span:nth-last-child(-n + 2) {
+      grid-column: 2;
+    }
+  }
 }
 
 @media (max-width: 480px) {
@@ -295,6 +615,11 @@
   }
 
   .status-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .round-summary,
+  .answer-grid {
     grid-template-columns: 1fr;
   }
 
@@ -315,5 +640,14 @@
 
   .action-button {
     width: 100%;
+  }
+
+  .phase-actions {
+    align-items: stretch;
+    flex-direction: column;
+
+    button {
+      width: 100%;
+    }
   }
 }

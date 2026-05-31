@@ -47,13 +47,25 @@ export class ApiManagerService {
     private handleError(error: HttpErrorResponse) {
         let message = 'Something went wrong. Please try again.';
 
+        if (typeof error.error === 'string') {
+            message = error.error;
+        }
+
         if (error.error?.message) {
             message = error.error.message;
         }
 
         if (error.error?.errors) {
             const firstError = Object.values(error.error.errors)[0];
-            message = String(firstError);
+            message = Array.isArray(firstError) ? String(firstError[0]) : String(firstError);
+        }
+
+        if (error.status === 404 && message === 'Something went wrong. Please try again.') {
+            message = 'Room was not found.';
+        }
+
+        if (error.status === 0) {
+            message = 'Cannot reach the game server. Please check that the backend is running.';
         }
 
         return throwError(() => new Error(message));
@@ -62,4 +74,3 @@ export class ApiManagerService {
 
 
 }
-

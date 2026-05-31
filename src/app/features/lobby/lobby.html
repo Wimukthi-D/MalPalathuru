@@ -8,27 +8,46 @@
         }
 
         @if (errorMessage()) {
-        <div class="error-box">
+        <div class="error-box compact-error">
             <mat-icon>error</mat-icon>
             <p>{{ errorMessage() }}</p>
 
+            @if (!room()) {
             <a routerLink="/" class="text-link">
                 Back to Home
             </a>
+            }
         </div>
         }
 
         @if (room() && !loading()) {
         <header class="lobby-header">
             <div>
-                <p class="eyebrow">Game Lobby</p>
-                <h1>{{ isLobbyStatus() ? 'Waiting for Players' : 'Game Started' }}</h1>
+                <p class="eyebrow">{{ isLobbyStatus() ? 'Game Lobby' : 'Game Room' }}</p>
+                <h1>
+                    @if (isClosed()) {
+                    Room Closed
+                    } @else if (isFinished()) {
+                    Final Leaderboard
+                    } @else if (isLobbyStatus()) {
+                    Waiting for Players
+                    } @else {
+                    Round {{ roundNumber(currentRound()) }}
+                    }
+                </h1>
             </div>
 
-            <button mat-icon-button type="button" aria-label="Refresh lobby" (click)="refreshLobby()">
+            <button mat-icon-button type="button" aria-label="Refresh room" (click)="refreshLobby()">
                 <mat-icon>refresh</mat-icon>
             </button>
         </header>
+
+        @if (closedMessage()) {
+        <div class="notice-box">
+            <mat-icon>info</mat-icon>
+            <span>{{ closedMessage() }}</span>
+        </div>
+        }
 
         <div class="room-code-card">
             <span>Room Code</span>
@@ -59,7 +78,13 @@
 
             <div class="status-item">
                 <span>Timer</span>
-                <strong>{{ room()?.countLimitSeconds }}s</strong>
+                <strong>
+                    @if (timerRemaining() !== null) {
+                    {{ timerRemaining() }}s
+                    } @else {
+                    {{ room()?.countLimitSeconds }}s
+                    }
+                </strong>
             </div>
 
             <div class="status-item">
@@ -70,6 +95,11 @@
             <div class="status-item">
                 <span>Status</span>
                 <strong>{{ room()?.status }}</strong>
+            </div>
+
+            <div class="status-item">
+                <span>Socket</span>
+                <strong>{{ socketConnected() ? 'Connected' : 'Connecting' }}</strong>
             </div>
         </div>
 
@@ -107,11 +137,18 @@
                                 } @else {
                                 Player
                                 }
+                                <span class="score-dot">Score {{ playerScore(player) }}</span>
                             </small>
                         </div>
                     </div>
 
                     <div class="player-actions">
+                        @if (playerReady(player)) {
+                        <span class="ready-badge">Ready</span>
+                        } @else {
+                        <span class="waiting-badge">Waiting</span>
+                        }
+
                         @if (player.connected) {
                         <span class="connected-badge">Online</span>
                         } @else {
@@ -130,7 +167,14 @@
             </div>
         </section>
 
+        @if (isLobbyStatus()) {
         <section class="lobby-actions">
+            <button mat-stroked-button type="button" class="action-button" [disabled]="actionLoading()"
+                (click)="toggleReady()">
+                <mat-icon>{{ currentPlayer()?.ready ? 'hourglass_empty' : 'check_circle' }}</mat-icon>
+                {{ currentPlayer()?.ready ? 'Unready' : 'Ready' }}
+            </button>
+
             @if (isHost()) {
             <button mat-stroked-button type="button" class="action-button"
                 [disabled]="actionLoading() || !isLobbyStatus()" (click)="lockOrUnlockRoom()">
@@ -139,7 +183,7 @@
             </button>
 
             <button mat-raised-button color="primary" type="button" class="action-button"
-                [disabled]="actionLoading() || !isLobbyStatus()" (click)="startGame()">
+                [disabled]="actionLoading() || !canStartGame()" (click)="startGame()">
                 <mat-icon>play_arrow</mat-icon>
                 Start Game
             </button>
@@ -149,6 +193,261 @@
                 {{ isHost() ? 'Leave & Close Room' : 'Leave Lobby' }}
             </button>
         </section>
+        }
+
+        @if (!isLobbyStatus()) {
+        <section class="game-flow">
+            @if (currentRound()) {
+            <div class="round-summary">
+                <div>
+                    <span>Current Round</span>
+                    <strong>{{ roundNumber(currentRound()) }}</strong>
+                </div>
+
+                <div>
+                    <span>Suggester</span>
+                    <strong>{{ currentSuggester()?.playerName || 'Waiting' }}</strong>
+                </div>
+
+                <div>
+                    <span>Letter</span>
+                    <strong>{{ selectedLetter() || 'Not selected' }}</strong>
+                </div>
+
+                <div>
+                    <span>Used Letters</span>
+                    <strong>{{ usedLetters().length ? usedLetters().join(', ') : 'None' }}</strong>
+                </div>
+            </div>
+            }
+
+            @if (isLetterSelection() && !isFinished()) {
+            <section class="phase-panel">
+                <div class="section-title-row">
+                    <h2>Letter Selection</h2>
+                    @if (isCurrentSuggester()) {
+                    <span>Your turn</span>
+                    } @else {
+                    <span>{{ currentSuggester()?.playerName || 'The suggester' }} selects</span>
+                    }
+                </div>
+
+                <div class="letter-grid">
+                    @for (letter of alphabet; track letter) {
+                    <button type="button" class="letter-button" [class.used-letter]="usedLetters().includes(letter)"
+                        [class.selected-letter]="selectedLetter() === letter" [disabled]="!canSelectLetter(letter)"
+                        (click)="selectLetter(letter)">
+                        {{ letter }}
+                    </button>
+                    }
+                </div>
+            </section>
+            }
+
+            @if (isAnswerPhase()) {
+            <section class="phase-panel">
+                <div class="section-title-row">
+                    <h2>Answers</h2>
+                    <span>
+                        @if (isRoundLocked()) {
+                        Locked
+                        } @else if (timerRemaining() !== null) {
+                        {{ timerRemaining() }}s left
+                        } @else {
+                        Waiting for countdown
+                        }
+                    </span>
+                </div>
+
+                <div class="answer-grid">
+                    @for (field of answerFields; track field.key) {
+                    <label class="answer-field">
+                        <span>
+                            <mat-icon>{{ field.icon }}</mat-icon>
+                            {{ field.label }}
+                        </span>
+
+                        <input type="text" [name]="field.key" [(ngModel)]="answerForm[field.key]"
+                            [disabled]="!canEditAnswers()" (ngModelChange)="markAnswerDirty()" autocomplete="off" />
+                    </label>
+                    }
+                </div>
+
+                <div class="phase-actions">
+                    <button mat-raised-button color="primary" type="button"
+                        [disabled]="!canEditAnswers() || actionLoading()" (click)="submitAnswers()">
+                        <mat-icon>send</mat-icon>
+                        {{ submittedAnswers() ? 'Update Answers' : 'Submit Answers' }}
+                    </button>
+
+                    <button mat-stroked-button type="button" [disabled]="isRoundLocked() || actionLoading()"
+                        (click)="lockRound()">
+                        <mat-icon>timer_off</mat-icon>
+                        Lock Round
+                    </button>
+                </div>
+            </section>
+            }
+
+            @if (canStartReview()) {
+            <section class="phase-panel compact-panel">
+                <div>
+                    <h2>Review Ready</h2>
+                    <p>The round is locked. Start review when everyone is ready to vote.</p>
+                </div>
+
+                <button mat-raised-button color="primary" type="button" [disabled]="actionLoading()"
+                    (click)="startReview()">
+                    <mat-icon>rate_review</mat-icon>
+                    Start Review
+                </button>
+            </section>
+            }
+
+            @if (isReviewing()) {
+            <section class="phase-panel">
+                <div class="section-title-row">
+                    <h2>Review</h2>
+                    <span>
+                        @if (reviewState()?.totalItems) {
+                        {{ (reviewState()?.currentIndex ?? 0) + 1 }} / {{ reviewState()?.totalItems }}
+                        } @else {
+                        Current answer
+                        }
+                    </span>
+                </div>
+
+                <div class="current-review-card">
+                    @if (currentReviewItem()) {
+                    <span>{{ reviewItemFieldLabel(currentReviewItem()) }}</span>
+                    <strong>{{ reviewItemValue(currentReviewItem()) || 'No answer' }}</strong>
+                    <small>{{ reviewItemPlayerName(currentReviewItem()) }}</small>
+
+                    <div class="phase-actions">
+                        <button mat-stroked-button type="button" [disabled]="actionLoading()"
+                            (click)="voteOnCurrentAnswer('ACCEPT')">
+                            <mat-icon>thumb_up</mat-icon>
+                            Accept
+                        </button>
+
+                        <button mat-stroked-button type="button" [disabled]="actionLoading()"
+                            (click)="voteOnCurrentAnswer('REJECT')">
+                            <mat-icon>thumb_down</mat-icon>
+                            Reject
+                        </button>
+
+                        @if (isHost()) {
+                        <button mat-raised-button color="primary" type="button" [disabled]="actionLoading()"
+                            (click)="decideCurrentAnswer('ACCEPTED')">
+                            Accept Final
+                        </button>
+
+                        <button mat-raised-button color="warn" type="button" [disabled]="actionLoading()"
+                            (click)="decideCurrentAnswer('REJECTED')">
+                            Reject Final
+                        </button>
+                        }
+                    </div>
+                    } @else {
+                    <p>Waiting for the next answer from the backend.</p>
+                    }
+                </div>
+
+                <div class="review-table-wrap">
+                    <table class="review-table">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                @for (field of answerFields; track field.key) {
+                                <th>{{ field.label }}</th>
+                                }
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @for (row of reviewRows(); track row.player.id) {
+                            <tr>
+                                <td>
+                                    <strong>{{ row.player.playerName }}</strong>
+                                </td>
+
+                                @for (cell of row.cells; track cell.field) {
+                                <td [class.current-answer]="isCurrentReviewAnswer(cell.answerId)">
+                                    <span>{{ cell.value || 'No answer' }}</span>
+
+                                    @if (cell.decision) {
+                                    <small>{{ cell.decision }}</small>
+                                    } @else if (cell.votes.length) {
+                                    <small>{{ formatVotes(cell.votes) }}</small>
+                                    }
+                                </td>
+                                }
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                @if (isHost()) {
+                <div class="phase-actions">
+                    <button mat-raised-button color="primary" type="button" [disabled]="actionLoading()"
+                        (click)="completeReview()">
+                        <mat-icon>done_all</mat-icon>
+                        Complete Review
+                    </button>
+                </div>
+                }
+            </section>
+            }
+
+            @if (isLeaderboardStatus() || isFinished()) {
+            <section class="phase-panel">
+                <div class="section-title-row">
+                    <h2>{{ isFinished() ? 'Final Scores' : 'Round Scores' }}</h2>
+                    <span>{{ leaderboardRows().length }} players</span>
+                </div>
+
+                <div class="leaderboard-list">
+                    @for (entry of leaderboardRows(); track entry.rank) {
+                    <div class="leaderboard-row">
+                        <span class="rank">#{{ entry.rank }}</span>
+                        <strong>{{ entry.playerName }}</strong>
+                        <span>Round {{ entry.roundScore }}</span>
+                        <span>Total {{ entry.totalScore }}</span>
+                    </div>
+                    }
+                </div>
+
+                <div class="phase-actions">
+                    @if (isHost() && !isFinished()) {
+                    <button mat-raised-button color="primary" type="button" [disabled]="actionLoading()"
+                        (click)="nextRound()">
+                        <mat-icon>skip_next</mat-icon>
+                        Next Round
+                    </button>
+                    }
+
+                    @if (isHost()) {
+                    <button mat-stroked-button type="button" [disabled]="actionLoading()" (click)="closeRoom()">
+                        <mat-icon>close</mat-icon>
+                        Close Room
+                    </button>
+                    }
+                </div>
+            </section>
+            }
+
+            @if (isHost() && !isLeaderboardStatus() && !isFinished()) {
+            <section class="lobby-actions">
+                <button mat-stroked-button type="button" class="leave-button" [disabled]="actionLoading()"
+                    (click)="closeRoom()">
+                    <mat-icon>close</mat-icon>
+                    Close Room
+                </button>
+            </section>
+            }
+        </section>
+        }
         }
     </section>
 </main>
